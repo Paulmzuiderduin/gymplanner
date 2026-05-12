@@ -1,3 +1,10 @@
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
 export const createGoalInput = (overrides = {}) => ({
   schoolType: 'voortgezet onderwijs',
   classLabel: '2 vwo',
@@ -19,7 +26,7 @@ export const createGoalOutput = (overrides = {}) => ({
 });
 
 export const createLesson = (overrides = {}) => ({
-  id: `lesson_${crypto.randomUUID()}`,
+  id: `lesson_${generateId()}`,
   title: 'Nieuwe les',
   date: new Date().toISOString().slice(0, 10),
   schoolType: 'voortgezet onderwijs',
@@ -91,7 +98,7 @@ export const createSampleData = () => {
         }),
         layoutPlacements: [
           {
-            id: `placement_${crypto.randomUUID()}`,
+            id: `placement_${generateId()}`,
             inventoryItemId: 'basketbal',
             x: 18,
             y: 36,
@@ -103,7 +110,7 @@ export const createSampleData = () => {
             zIndex: 1
           },
           {
-            id: `placement_${crypto.randomUUID()}`,
+            id: `placement_${generateId()}`,
             inventoryItemId: 'pilon',
             x: 34,
             y: 24,
