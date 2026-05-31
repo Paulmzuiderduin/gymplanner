@@ -12,7 +12,17 @@ import EmptyState from './components/EmptyState';
 import ItemGlyph from './components/ItemGlyph';
 import SectionHeader from './components/SectionHeader';
 import StatPill from './components/StatPill';
-import { clampPlacementToCanvas, createPlacement, formatLessonDate, getLessonStats, getVenueDimensions } from './calculations';
+import {
+  clampPlacementToVenue,
+  createPlacement,
+  formatLessonDate,
+  getLessonStats,
+  getPlacementPercentSize,
+  getPlacementRenderBox,
+  getVenueDimensions,
+  meterToPercentPoint,
+  percentToMeterPoint
+} from './calculations';
 import { createEmptyData, createLesson, createSampleData } from './dataModel';
 import { generateBeweegdoelen } from './goalGenerator';
 import { INVENTORY_CATEGORIES, INVENTORY_ITEMS, inventoryLookup } from './inventory';
@@ -101,7 +111,7 @@ const VenueLines = ({ venue, dimensions }) => {
               rx={layer.rx || 0}
               ry={layer.ry || 0}
               fill={layer.fill || 'none'}
-              stroke="#ffffff"
+              stroke={layer.stroke || '#ffffff'}
               strokeWidth={(layer.strokeWidth || 0.8) * strokeScale}
               strokeDasharray={layer.dash || undefined}
             />
@@ -116,7 +126,7 @@ const VenueLines = ({ venue, dimensions }) => {
               cy={layer.cy}
               r={layer.r}
               fill={layer.fill || 'none'}
-              stroke="#ffffff"
+              stroke={layer.stroke || '#ffffff'}
               strokeWidth={(layer.strokeWidth || 0.8) * strokeScale}
             />
           );
@@ -131,7 +141,7 @@ const VenueLines = ({ venue, dimensions }) => {
               rx={layer.rx}
               ry={layer.ry}
               fill={layer.fill || 'none'}
-              stroke="#ffffff"
+              stroke={layer.stroke || '#ffffff'}
               strokeWidth={(layer.strokeWidth || 0.8) * strokeScale}
             />
           );
@@ -143,7 +153,7 @@ const VenueLines = ({ venue, dimensions }) => {
               key={`${venue.id}_path_${index}`}
               d={layer.d}
               fill={layer.fill || 'none'}
-              stroke="#ffffff"
+              stroke={layer.stroke || '#ffffff'}
               strokeWidth={(layer.strokeWidth || 0.8) * strokeScale}
               strokeDasharray={layer.dash || undefined}
             />
@@ -157,7 +167,7 @@ const VenueLines = ({ venue, dimensions }) => {
             y1={layer.y1}
             x2={layer.x2}
             y2={layer.y2}
-            stroke="#ffffff"
+            stroke={layer.stroke || '#ffffff'}
             strokeWidth={(layer.strokeWidth || 0.8) * strokeScale}
             strokeDasharray={layer.dash || undefined}
           />
@@ -171,7 +181,7 @@ const ToolkitApp = () => {
   const [data, setData] = useState(createEmptyData());
   const [loading, setLoading] = useState(true);
   const [activeLessonId, setActiveLessonId] = useState('');
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('planner');
   const [inventorySearch, setInventorySearch] = useState('');
   const [selectedPlacementId, setSelectedPlacementId] = useState('');
   const [toast, setToast] = useState('');
@@ -339,22 +349,42 @@ const ToolkitApp = () => {
   };
 
   const getSpawnPoint = (count) => {
-    const positions = [
-      { x: 18, y: 20 },
-      { x: 34, y: 20 },
-      { x: 50, y: 20 },
-      { x: 66, y: 20 },
-      { x: 18, y: 40 },
-      { x: 34, y: 40 },
-      { x: 50, y: 40 },
-      { x: 66, y: 40 },
-      { x: 18, y: 60 },
-      { x: 34, y: 60 },
-      { x: 50, y: 60 },
-      { x: 66, y: 60 }
-    ];
+    const xStops = [0.18, 0.34, 0.5, 0.66];
+    const yStops = [0.2, 0.4, 0.6];
+    const xRatio = xStops[count % xStops.length];
+    const yRatio = yStops[Math.floor(count / xStops.length) % yStops.length];
 
-    return positions[count % positions.length];
+    return {
+      xM: Number((currentVenueDimensions.width * xRatio).toFixed(2)),
+      yM: Number((currentVenueDimensions.height * yRatio).toFixed(2))
+    };
+  };
+
+  const getPointerMeters = (event) => {
+    if (!canvasRef.current) return null;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const pointerX = ((event.clientX - rect.left) / rect.width) * 100;
+    const pointerY = ((event.clientY - rect.top) / rect.height) * 100;
+    const point = percentToMeterPoint(pointerX, pointerY, currentVenueDimensions);
+
+    return {
+      pointerX,
+      pointerY,
+      xM: point.xM,
+      yM: point.yM
+    };
+  };
+
+  const getPlacementDisplay = (placement) => {
+    const box = getPlacementRenderBox(placement, currentVenueDimensions);
+    const sizePercent = getPlacementPercentSize(placement, currentVenueDimensions);
+
+    return {
+      box,
+      widthPercent: sizePercent.width,
+      heightPercent: sizePercent.height
+    };
   };
 
   const placeInventoryItem = (itemId) => {
@@ -366,8 +396,8 @@ const ToolkitApp = () => {
     const placement = createPlacement({
       item,
       venueDimensions: currentVenueDimensions,
-      x: point.x,
-      y: point.y
+      xM: point.xM,
+      yM: point.yM
     });
 
     updateCurrentLesson((lesson) => {
@@ -386,36 +416,31 @@ const ToolkitApp = () => {
   };
 
   const handlePlacementPointerDown = (event, placement) => {
-    if (!canvasRef.current) return;
-
     event.stopPropagation();
-    const rect = canvasRef.current.getBoundingClientRect();
-    const pointerX = ((event.clientX - rect.left) / rect.width) * 100;
-    const pointerY = ((event.clientY - rect.top) / rect.height) * 100;
+    const pointer = getPointerMeters(event);
+    if (!pointer) return;
 
     dragRef.current = {
       placementId: placement.id,
-      offsetX: pointerX - placement.x,
-      offsetY: pointerY - placement.y
+      offsetX: pointer.xM - placement.xM,
+      offsetY: pointer.yM - placement.yM
     };
 
     setSelectedPlacementId(placement.id);
   };
 
   const handleCanvasPointerMove = (event) => {
-    if (!dragRef.current || !canvasRef.current || !currentLesson) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const pointerX = ((event.clientX - rect.left) / rect.width) * 100;
-    const pointerY = ((event.clientY - rect.top) / rect.height) * 100;
+    if (!dragRef.current || !currentLesson) return;
+    const pointer = getPointerMeters(event);
+    if (!pointer) return;
 
     updateCurrentLesson((lesson) => {
       const placement = lesson.layoutPlacements.find((item) => item.id === dragRef.current.placementId);
       if (!placement) return;
 
-      placement.x = pointerX - dragRef.current.offsetX;
-      placement.y = pointerY - dragRef.current.offsetY;
-      Object.assign(placement, clampPlacementToCanvas(placement));
+      placement.xM = pointer.xM - dragRef.current.offsetX;
+      placement.yM = pointer.yM - dragRef.current.offsetY;
+      Object.assign(placement, clampPlacementToVenue(placement, currentVenueDimensions));
     });
   };
 
@@ -429,7 +454,7 @@ const ToolkitApp = () => {
       const placement = lesson.layoutPlacements.find((item) => item.id === selectedPlacement.id);
       if (!placement) return;
       placement[field] = value;
-      Object.assign(placement, clampPlacementToCanvas(placement));
+      Object.assign(placement, clampPlacementToVenue(placement, currentVenueDimensions));
     });
   };
 
@@ -762,9 +787,9 @@ const ToolkitApp = () => {
 
     return (
       <div className="space-y-5">
-        <div className="grid gap-5 sm:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[200px_minmax(0,1.75fr)_250px]">
-          <div className="glass-card order-2 rounded-[24px] p-4 sm:order-1">
-            <SectionHeader title="Inventaris" subtitle="Klik op een item om het direct op de ruimte te zetten." />
+        <div className="grid gap-5 xl:grid-cols-[180px_minmax(0,1fr)_260px]">
+          <div className="glass-card order-2 rounded-[24px] p-4 xl:order-1">
+            <SectionHeader title="Inventaris" subtitle="Klik een item om het direct op de plattegrond te zetten." />
             <div className="relative mt-4">
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
@@ -786,7 +811,7 @@ const ToolkitApp = () => {
                 </button>
               ))}
             </div>
-            <div className="mt-4 space-y-4 overflow-y-auto pr-1" style={{ maxHeight: '62vh' }}>
+            <div className="mt-4 space-y-4 overflow-y-auto pr-1" style={{ maxHeight: '70vh' }}>
               {inventoryByCategory.map((category) => (
                 <div key={category.id}>
                   <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{category.label}</p>
@@ -796,14 +821,14 @@ const ToolkitApp = () => {
                       return (
                         <button
                           key={item.id}
-                          className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition ${
-                            isSelected ? 'border-slate-300 bg-white' : 'border-transparent bg-white/70 hover:border-slate-200'
+                          className={`flex w-full items-center gap-3 rounded-[18px] border px-3 py-2.5 text-left transition ${
+                            isSelected ? 'border-slate-900 bg-white shadow-sm' : 'border-transparent bg-white/70 hover:border-slate-200'
                           }`}
                           onClick={() => placeInventoryItem(item.id)}
                           type="button"
                         >
-                          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100">
-                            <ItemGlyph item={item} />
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-slate-100">
+                            <ItemGlyph item={item} className="h-9 w-9" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-slate-900">{item.nameNl}</p>
@@ -820,10 +845,10 @@ const ToolkitApp = () => {
             </div>
           </div>
 
-          <div className="glass-card order-1 rounded-[24px] p-4 sm:order-2">
+          <div className="glass-card order-1 rounded-[28px] p-4 xl:order-2">
             <SectionHeader
               title="Plattegrond"
-              subtitle="Klik links op materiaal om het meteen in de ruimte te zetten. Daarna kun je elk symbool verslepen."
+              subtitle="Materiaal komt direct op de ruimte. Versleep daarna naar de juiste plek."
               actions={
                 <div className="flex flex-wrap gap-2">
                   <StatPill label="Ruimte" value={currentVenue.nameNl} tone="info" />
@@ -835,8 +860,9 @@ const ToolkitApp = () => {
               ref={canvasRef}
               className="relative mt-4 overflow-hidden rounded-[28px] border border-slate-300 bg-white shadow-inner"
               style={{
+                width: '100%',
                 aspectRatio: `${currentVenueDimensions.width} / ${currentVenueDimensions.height}`,
-                minHeight: currentVenue.kind === 'indoor' ? '480px' : '520px'
+                maxHeight: currentVenue.kind === 'indoor' ? '82vh' : '86vh'
               }}
               onPointerDown={handleCanvasPointerDown}
               onPointerMove={handleCanvasPointerMove}
@@ -849,56 +875,48 @@ const ToolkitApp = () => {
                 if (!item) return null;
 
                 const isFootprint = item.renderMode === 'footprint';
-                const canShowLabel = placement.width > 11;
+                const display = getPlacementDisplay(placement);
+                const iconPoint = meterToPercentPoint(
+                  placement.xM + placement.widthM / 2,
+                  placement.yM + placement.heightM / 2,
+                  currentVenueDimensions
+                );
+                const footprintStyle = {
+                  ...display.box,
+                  transform: `rotate(${placement.rotation}deg)`
+                };
+                const iconStyle = {
+                  left: `${iconPoint.x}%`,
+                  top: `${iconPoint.y}%`,
+                  transform: `translate(-50%, -50%) rotate(${placement.rotation}deg)`
+                };
 
                 return (
                   <button
                     key={placement.id}
-                    className={`absolute flex items-center justify-center ${
-                      placement.id === selectedPlacementId ? 'ring-2 ring-orange-400 ring-offset-2 ring-offset-transparent' : ''
-                    }`}
+                    className="absolute flex items-center justify-center border-0 bg-transparent p-0 outline-none transition focus:outline-none"
                     onPointerDown={(event) => handlePlacementPointerDown(event, placement)}
                     onClick={(event) => {
                       event.stopPropagation();
                       setSelectedPlacementId(placement.id);
                     }}
-                    style={{
-                      left: `${placement.x}%`,
-                      top: `${placement.y}%`,
-                      width: `${placement.width}%`,
-                      height: `${placement.height}%`,
-                      transform: `rotate(${placement.rotation}deg)`
-                    }}
+                    style={isFootprint ? footprintStyle : iconStyle}
                     type="button"
-                  >
-                    {isFootprint ? (
-                      <div
-                        className="relative flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-slate-900/25"
-                        style={{ backgroundColor: `${item.color}20` }}
-                      >
-                        <ItemGlyph item={item} className="h-9 w-9" />
-                        {canShowLabel ? (
-                          <span className="absolute bottom-1 left-1 rounded-full bg-white/85 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
-                            {item.nameNl}
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <div className="rounded-full bg-white/92 p-1.5 shadow-md">
-                        <ItemGlyph item={item} className="h-7 w-7" />
-                      </div>
-                    )}
-                    <span className="absolute -right-1 -top-1 rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      {placement.quantity}
-                    </span>
+                    >
+                    <ItemGlyph
+                      item={item}
+                      className={`drop-shadow-[0_2px_3px_rgba(24,53,47,0.16)] ${
+                        isFootprint ? 'h-14 w-14' : 'h-10 w-10'
+                      }`}
+                    />
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="glass-card order-3 rounded-[24px] p-4 sm:col-span-2 xl:col-span-1">
-            <SectionHeader title="Plaatsing" subtitle="Werk het geselecteerde materiaal precies uit." />
+          <div className="glass-card order-3 rounded-[24px] p-4 xl:order-3">
+            <SectionHeader title="Plaatsing" subtitle="Werk positie en rotatie van het gekozen materiaal uit." />
             {selectedPlacement && currentLesson ? (
               <div className="mt-4 space-y-3">
                 <div className="rounded-2xl bg-white/85 p-4">
@@ -917,15 +935,6 @@ const ToolkitApp = () => {
                   </div>
                 </div>
                 <label className="grid gap-2 text-sm font-medium text-slate-700">
-                  Aantal
-                  <input
-                    type="number"
-                    min="1"
-                    value={selectedPlacement.quantity}
-                    onChange={(event) => updateSelectedPlacementField('quantity', Math.max(1, Number(event.target.value) || 1))}
-                  />
-                </label>
-                <label className="grid gap-2 text-sm font-medium text-slate-700">
                   Rotatie
                   <input
                     type="number"
@@ -936,25 +945,25 @@ const ToolkitApp = () => {
                   />
                 </label>
                 <label className="grid gap-2 text-sm font-medium text-slate-700">
-                  X positie (%)
+                  X positie (m)
                   <input
                     type="number"
                     min="0"
-                    max="100"
                     step="0.1"
-                    value={selectedPlacement.x}
-                    onChange={(event) => updateSelectedPlacementField('x', Number(event.target.value) || 0)}
+                    max={currentVenueDimensions.width}
+                    value={selectedPlacement.xM}
+                    onChange={(event) => updateSelectedPlacementField('xM', Number(event.target.value) || 0)}
                   />
                 </label>
                 <label className="grid gap-2 text-sm font-medium text-slate-700">
-                  Y positie (%)
+                  Y positie (m)
                   <input
                     type="number"
                     min="0"
-                    max="100"
                     step="0.1"
-                    value={selectedPlacement.y}
-                    onChange={(event) => updateSelectedPlacementField('y', Number(event.target.value) || 0)}
+                    max={currentVenueDimensions.height}
+                    value={selectedPlacement.yM}
+                    onChange={(event) => updateSelectedPlacementField('yM', Number(event.target.value) || 0)}
                   />
                 </label>
                 <button

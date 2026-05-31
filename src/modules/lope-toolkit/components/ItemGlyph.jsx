@@ -20,6 +20,57 @@ const ItemGlyph = ({ item, className = 'h-8 w-8' }) => {
           <path d="M10 22c3-3 9-3 12 0" fill="none" {...shared} />
         </>
       ) : null}
+      {key === 'basketball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M6 16h20M16 6v20" fill="none" {...shared} />
+          <path d="M9 8c3 3 3 13 0 16M23 8c-3 3-3 13 0 16" fill="none" {...shared} />
+        </>
+      ) : null}
+      {key === 'soccerball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M16 10l3 2-1 4h-4l-1-4Z" fill="rgba(255,255,255,0.45)" stroke="rgba(24, 53, 47, 0.75)" strokeWidth="1.2" />
+          <path d="M10 12 8 16l3 3M22 12l2 4-3 3M12 22h8" fill="none" {...shared} />
+        </>
+      ) : null}
+      {key === 'volleyball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M11 7c4 3 6 8 5 15M22 9c-5 1-8 5-10 11M7 16c4-2 10-2 16 1" fill="none" {...shared} />
+        </>
+      ) : null}
+      {key === 'handball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M9 11c4 1 9 1 14 0M11 21c3-2 7-2 10 0M16 6c2 4 2 16 0 20" fill="none" {...shared} />
+        </>
+      ) : null}
+      {key === 'korfball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M8 12h16M10 21c3-2 9-2 12 0" fill="none" {...shared} />
+          <path d="M11 8c2 3 8 3 10 0" fill="none" {...shared} />
+        </>
+      ) : null}
+      {key === 'hockeyball' ? (
+        <>
+          <circle cx="16" cy="16" r="8.5" fill={fill} {...shared} />
+          <circle cx="13.5" cy="13.5" r="1.4" fill="rgba(255,255,255,0.72)" />
+        </>
+      ) : null}
+      {key === 'tennisball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M11 7c-2 2-4 6-4 9s2 7 4 9M21 7c2 2 4 6 4 9s-2 7-4 9" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2" />
+        </>
+      ) : null}
+      {key === 'medicineball' ? (
+        <>
+          <circle cx="16" cy="16" r="10" fill={fill} {...shared} />
+          <path d="M11 11h10v10H11Z" fill="rgba(255,255,255,0.18)" stroke="rgba(24, 53, 47, 0.65)" strokeWidth="1.1" />
+        </>
+      ) : null}
       {key === 'oval-ball' ? (
         <ellipse cx="16" cy="16" rx="10" ry="7" fill={fill} {...shared} transform="rotate(-22 16 16)" />
       ) : null}
@@ -30,44 +81,65 @@ const ItemGlyph = ({ item, className = 'h-8 w-8' }) => {
         </>
       ) : null}
       {key === 'disc' ? <ellipse cx="16" cy="16" rx="10" ry="4.5" fill={fill} {...shared} /> : null}
-      {key === 'cone' ? <path d="M16 5 24 25H8Z" fill={fill} {...shared} /> : null}
+      {key === 'cone' ? (
+        <>
+          <path d="M16 5 23 24H9Z" fill={fill} {...shared} />
+          <path d="M11 24h10" fill="none" {...shared} />
+          <path d="M13 14h6" fill="none" {...shared} />
+        </>
+      ) : null}
       {key === 'marker' ? (
         <>
           <circle cx="16" cy="20" r="7" fill={fill} {...shared} />
           <path d="M12 11h8" fill="none" {...shared} />
         </>
       ) : null}
-      {key === 'mat' ? <rect x="5" y="8" width="22" height="16" rx="3" fill={fill} {...shared} /> : null}
+      {key === 'mat' ? (
+        <>
+          <rect x="4.5" y="7" width="23" height="18" rx="3.5" fill={fill} />
+          <path d="M8 12h16M8 20h16" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.4" strokeLinecap="round" />
+        </>
+      ) : null}
       {key === 'bench' ? (
         <>
-          <rect x="4" y="11" width="24" height="6" rx="2" fill={fill} {...shared} />
-          <path d="M8 18v6M24 18v6" fill="none" {...shared} />
+          <rect x="4" y="10" width="24" height="5" rx="2" fill={fill} {...shared} />
+          <rect x="6" y="15.5" width="20" height="2.5" rx="1.2" fill="rgba(255,255,255,0.45)" />
+          <path d="M8 18v6M24 18v6M11 18v5M21 18v5" fill="none" {...shared} />
         </>
       ) : null}
       {key === 'box' ? (
         <>
-          <rect x="8" y="7" width="16" height="18" rx="2" fill={fill} {...shared} />
-          <path d="M8 13h16M8 19h16" fill="none" {...shared} />
+          <rect x="8" y="6.5" width="16" height="19" rx="2" fill={fill} {...shared} />
+          <path d="M8 12.5h16M8 18.5h16M8 24.5h16" fill="none" {...shared} />
+          <path d="M11 9.5h10" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.1" />
         </>
       ) : null}
       {key === 'vault' ? (
         <>
-          <path d="M10 10h12l2 6H8Z" fill={fill} {...shared} />
-          <path d="M12 16v8M20 16v8" fill="none" {...shared} />
+          <path d="M9 12c2-3 12-3 14 0l-1.5 5H10.5Z" fill={fill} {...shared} />
+          <path d="M12 17v7M20 17v7" fill="none" {...shared} />
+          <path d="M11 14h10" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
         </>
       ) : null}
       {key === 'board' ? (
         <>
-          <path d="M7 22 24 10l1 5-17 12Z" fill={fill} {...shared} />
+          <path d="M8 23c4-5 8-8 15-13l1 4c-6 3-10 7-15 12Z" fill={fill} {...shared} />
+          <path d="M13 19 20 14" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" />
         </>
       ) : null}
       {key === 'trampoline' ? (
         <>
-          <rect x="7" y="10" width="18" height="10" rx="3" fill={fill} {...shared} />
-          <path d="M10 21v4M22 21v4" fill="none" {...shared} />
+          <rect x="7" y="10" width="18" height="10" rx="4" fill={fill} {...shared} />
+          <rect x="9.5" y="12.5" width="13" height="5" rx="2.5" fill="rgba(255,255,255,0.38)" stroke="rgba(24, 53, 47, 0.4)" strokeWidth="1" />
+          <path d="M10 21v4M22 21v4M13 20.5v4M19 20.5v4" fill="none" {...shared} />
         </>
       ) : null}
-      {key === 'rope' ? <path d="M10 5c5 3-3 7 4 10s-3 7 6 12" fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round" /> : null}
+      {key === 'rope' ? (
+        <>
+          <path d="M10 5c5 3-3 7 4 10s-3 7 6 12" fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round" />
+          <circle cx="11" cy="7" r="1.5" fill={fill} />
+        </>
+      ) : null}
       {key === 'rings' ? (
         <>
           <path d="M11 7v7M21 7v7" fill="none" {...shared} />
@@ -87,21 +159,28 @@ const ItemGlyph = ({ item, className = 'h-8 w-8' }) => {
       ) : null}
       {key === 'goal' ? (
         <>
-          <path d="M8 24V11h16v13" fill="none" stroke={fill} strokeWidth="2.4" />
-          <path d="M12 24V15M20 24V15M8 19h16" fill="none" {...shared} />
+          <path d="M8 23V10h14v13" fill="none" stroke={fill} strokeWidth="2.4" />
+          <path d="M22 13v10M22 13H8M22 23H8" fill="none" stroke="rgba(24, 53, 47, 0.48)" strokeWidth="1.8" />
+          <path d="M12 23V15M18 23V15M8 19h14" fill="none" {...shared} />
         </>
       ) : null}
       {key === 'net' ? (
         <>
-          <path d="M6 16h20M8 10v12M24 10v12" fill="none" stroke={fill} strokeWidth="2.4" />
-          <path d="M10 12h12M10 20h12" fill="none" {...shared} />
+          <path d="M6 16h20M8 9v14M24 9v14" fill="none" stroke={fill} strokeWidth="2.4" />
+          <path d="M10 12h12M10 16h12M10 20h12M13 10v12M19 10v12" fill="none" {...shared} />
         </>
       ) : null}
-      {key === 'stick' ? <path d="M8 24 24 8" fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round" /> : null}
+      {key === 'stick' ? (
+        <>
+          <path d="M9 23 24 8" fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round" />
+          <path d="M7 24h4l2-2" fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      ) : null}
       {key === 'racket' ? (
         <>
           <ellipse cx="18" cy="11" rx="7" ry="8" fill="none" stroke={fill} strokeWidth="2.2" />
           <path d="M13 16 8 24" fill="none" stroke={fill} strokeWidth="3" strokeLinecap="round" />
+          <path d="M14 7v8M18 4v14M22 7v8M12 11h12" fill="none" stroke="rgba(24, 53, 47, 0.38)" strokeWidth="1" />
         </>
       ) : null}
       {key === 'paddle' ? (
@@ -147,7 +226,7 @@ const ItemGlyph = ({ item, className = 'h-8 w-8' }) => {
       {key === 'scoreboard' ? (
         <>
           <rect x="7" y="8" width="18" height="12" rx="2" fill={fill} {...shared} />
-          <path d="M13 20v5M19 20v5" fill="none" {...shared} />
+          <path d="M11 12h4M17 12h4M13 20v5M19 20v5" fill="none" {...shared} />
         </>
       ) : null}
       {key === 'pump' ? (
@@ -166,7 +245,7 @@ const ItemGlyph = ({ item, className = 'h-8 w-8' }) => {
       {key === 'cabinet' ? (
         <>
           <rect x="8" y="7" width="16" height="18" rx="2" fill={fill} {...shared} />
-          <path d="M16 7v18" fill="none" {...shared} />
+          <path d="M16 7v18M14 16h1M17 16h1" fill="none" {...shared} />
         </>
       ) : null}
       {key === 'rack' ? (
