@@ -38,4 +38,19 @@ describe('beweegdoelen generator', () => {
     assert.match(output.roleVariants[0].goal, /tikker/i);
     assert.match(output.roleVariants[1].goal, /renner/i);
   });
+
+  it('prefers a volleyball prompt over the default activity field', () => {
+    const output = generateBeweegdoelen({
+      schoolType: 'voortgezet onderwijs',
+      classLabel: '2 havo',
+      activity: 'basketbal',
+      prompt: 'Ik geef volleybal. Aan het einde van de les wil ik dat leerlingen bovenhands kunnen spelen.',
+      rolesText: '',
+      seriesContext: ''
+    });
+
+    assert.equal(output.domain, 'netspelen');
+    assert.match(output.baseGoal, /volleybal/i);
+    assert.match(output.average, /verplaatsing|samenwerking/i);
+  });
 });

@@ -137,15 +137,18 @@ const ROLE_HINTS = {
 const normalize = (value) => (value || '').trim();
 
 export const inferActivityKey = (activity, prompt) => {
-  const haystack = `${normalize(activity)} ${normalize(prompt)}`.toLowerCase();
-
-  for (const [keyword, key] of KEYWORD_MAP) {
-    if (haystack.includes(keyword)) {
-      return key;
+  const promptText = normalize(prompt).toLowerCase();
+  const activityText = normalize(activity).toLowerCase();
+  for (const haystack of [promptText, activityText]) {
+    if (!haystack) continue;
+    for (const [keyword, key] of KEYWORD_MAP) {
+      if (haystack.includes(keyword)) {
+        return key;
+      }
     }
   }
 
-  return 'basketbal';
+  return activityText || 'basketbal';
 };
 
 const inferSkill = (prompt, fallback) => {

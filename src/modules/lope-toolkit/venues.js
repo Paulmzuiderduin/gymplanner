@@ -31,6 +31,13 @@ const createPath = (d, extra = {}) => ({
 });
 
 const round = (value) => Number(value.toFixed(2));
+const LINE_COLORS = {
+  neutral: '#fffdf6',
+  basketball: '#d94841',
+  volleyball: '#e0b321',
+  badminton: '#2f7de1',
+  handball: '#fffdf6'
+};
 
 const buildGymzaalLines = ({ width, height }) => {
   const centerX = width / 2;
@@ -40,20 +47,20 @@ const buildGymzaalLines = ({ width, height }) => {
   const badmintonCourtY = (height - 6.1) / 2;
 
   return [
-    createRect(0.2, 0.2, width - 0.4, height - 0.4, { strokeWidth: 0.12 }),
-    createRect(0.5, basketCourtY, width - 1, 15, { strokeWidth: 0.12 }),
-    createLine(centerX, basketCourtY, centerX, basketCourtY + 15, { strokeWidth: 0.1 }),
-    createCircle(centerX, centerY, 1.8, { strokeWidth: 0.1 }),
-    createRect(0.5, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.1 }),
-    createRect(width - 5.4, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.1 }),
-    createCircle(5.8, centerY, 1.8, { strokeWidth: 0.08 }),
-    createCircle(width - 5.8, centerY, 1.8, { strokeWidth: 0.08 }),
-    createRect(5, volleyCourtY, 18, 9, { strokeWidth: 0.08 }),
-    createLine(centerX, volleyCourtY, centerX, volleyCourtY + 9, { strokeWidth: 0.08, dash: '0.35 0.25' }),
-    createRect(0.9, badmintonCourtY, 13.4, 6.1, { strokeWidth: 0.06 }),
-    createRect(width - 14.3, badmintonCourtY, 13.4, 6.1, { strokeWidth: 0.06 }),
-    createLine(7.6, badmintonCourtY, 7.6, badmintonCourtY + 6.1, { strokeWidth: 0.05, dash: '0.25 0.2' }),
-    createLine(width - 7.6, badmintonCourtY, width - 7.6, badmintonCourtY + 6.1, { strokeWidth: 0.05, dash: '0.25 0.2' })
+    createRect(0.2, 0.2, width - 0.4, height - 0.4, { strokeWidth: 0.12, stroke: LINE_COLORS.neutral }),
+    createRect(0.5, basketCourtY, width - 1, 15, { strokeWidth: 0.12, stroke: LINE_COLORS.basketball }),
+    createLine(centerX, basketCourtY, centerX, basketCourtY + 15, { strokeWidth: 0.1, stroke: LINE_COLORS.basketball }),
+    createCircle(centerX, centerY, 1.8, { strokeWidth: 0.1, stroke: LINE_COLORS.basketball }),
+    createRect(0.5, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.1, stroke: LINE_COLORS.basketball }),
+    createRect(width - 5.4, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.1, stroke: LINE_COLORS.basketball }),
+    createCircle(5.8, centerY, 1.8, { strokeWidth: 0.08, stroke: LINE_COLORS.basketball }),
+    createCircle(width - 5.8, centerY, 1.8, { strokeWidth: 0.08, stroke: LINE_COLORS.basketball }),
+    createRect(5, volleyCourtY, 18, 9, { strokeWidth: 0.08, stroke: LINE_COLORS.volleyball }),
+    createLine(centerX, volleyCourtY, centerX, volleyCourtY + 9, { strokeWidth: 0.08, dash: '0.35 0.25', stroke: LINE_COLORS.volleyball }),
+    createRect(0.9, badmintonCourtY, 13.4, 6.1, { strokeWidth: 0.06, stroke: LINE_COLORS.badminton }),
+    createRect(width - 14.3, badmintonCourtY, 13.4, 6.1, { strokeWidth: 0.06, stroke: LINE_COLORS.badminton }),
+    createLine(7.6, badmintonCourtY, 7.6, badmintonCourtY + 6.1, { strokeWidth: 0.05, dash: '0.25 0.2', stroke: LINE_COLORS.badminton }),
+    createLine(width - 7.6, badmintonCourtY, width - 7.6, badmintonCourtY + 6.1, { strokeWidth: 0.05, dash: '0.25 0.2', stroke: LINE_COLORS.badminton })
   ];
 };
 
@@ -66,22 +73,22 @@ const buildSporthalLines = ({ width, height }) => {
   const basketballY = (height - 15) / 2;
 
   return [
-    createRect(0.25, 0.25, width - 0.5, height - 0.5, { strokeWidth: 0.12 }),
-    createRect(handballX, handballY, 40, 20, { strokeWidth: 0.13 }),
-    createLine(centerX, handballY, centerX, handballY + 20, { strokeWidth: 0.1 }),
-    createCircle(centerX, centerY, 3, { strokeWidth: 0.1 }),
+    createRect(0.25, 0.25, width - 0.5, height - 0.5, { strokeWidth: 0.12, stroke: LINE_COLORS.neutral }),
+    createRect(handballX, handballY, 40, 20, { strokeWidth: 0.13, stroke: LINE_COLORS.handball }),
+    createLine(centerX, handballY, centerX, handballY + 20, { strokeWidth: 0.1, stroke: LINE_COLORS.handball }),
+    createCircle(centerX, centerY, 3, { strokeWidth: 0.1, stroke: LINE_COLORS.handball }),
     createPath(
       `M ${round(handballX + 6)} ${round(centerY - 6)} A 6 6 0 0 0 ${round(handballX + 6)} ${round(centerY + 6)}`,
-      { strokeWidth: 0.12 }
+      { strokeWidth: 0.12, stroke: LINE_COLORS.handball }
     ),
     createPath(
       `M ${round(handballX + 34)} ${round(centerY - 6)} A 6 6 0 0 1 ${round(handballX + 34)} ${round(centerY + 6)}`,
-      { strokeWidth: 0.12 }
+      { strokeWidth: 0.12, stroke: LINE_COLORS.handball }
     ),
-    createRect(basketballX, basketballY, 28, 15, { strokeWidth: 0.08 }),
-    createCircle(centerX, centerY, 1.8, { strokeWidth: 0.08 }),
-    createRect(basketballX, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.08 }),
-    createRect(basketballX + 23.1, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.08 })
+    createRect(basketballX, basketballY, 28, 15, { strokeWidth: 0.08, stroke: LINE_COLORS.basketball }),
+    createCircle(centerX, centerY, 1.8, { strokeWidth: 0.08, stroke: LINE_COLORS.basketball }),
+    createRect(basketballX, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.08, stroke: LINE_COLORS.basketball }),
+    createRect(basketballX + 23.1, centerY - 2.45, 4.9, 4.9, { strokeWidth: 0.08, stroke: LINE_COLORS.basketball })
   ];
 };
 

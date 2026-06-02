@@ -22,4 +22,13 @@ describe('venue line builders', () => {
     assert.equal(lines[5].width, 5.5);
     assert.equal(lines[8].cx, 89);
   });
+
+  it('uses standard indoor line colors for gymzaal sports', () => {
+    const venue = venueLookup['gymzaal-standard'];
+    const lines = venue.buildLineLayers({ width: 28, height: 16 });
+
+    assert.equal(lines[1].stroke, '#d94841');
+    assert.equal(lines[8].stroke, '#e0b321');
+    assert.equal(lines[10].stroke, '#2f7de1');
+  });
 });

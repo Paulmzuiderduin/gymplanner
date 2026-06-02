@@ -1,3 +1,7 @@
+import { getVenueDimensions, migrateLegacyPlacement } from './calculations';
+import { inventoryLookup } from './inventory';
+import { venueLookup } from './venues';
+
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -45,16 +49,26 @@ export const createLesson = (overrides = {}) => ({
 });
 
 export const createEmptyData = () => ({
-  version: 2,
+  version: 3,
   lessons: [],
   lastUpdated: new Date().toISOString()
 });
+
+const normalizePlacements = (lesson) => {
+  const venue = venueLookup[lesson.venueTemplateId] || venueLookup['gymzaal-standard'];
+  const venueDimensions = getVenueDimensions(lesson, venue);
+
+  return (Array.isArray(lesson.layoutPlacements) ? lesson.layoutPlacements : []).map((placement) => {
+    const item = inventoryLookup[placement.inventoryItemId];
+    return migrateLegacyPlacement(placement, item, venueDimensions);
+  });
+};
 
 export const ensureDataShape = (raw) => {
   if (!raw || typeof raw !== 'object') return createEmptyData();
 
   return {
-    version: 2,
+    version: 3,
     lessons: Array.isArray(raw.lessons)
       ? raw.lessons.map((lesson) =>
           createLesson({
@@ -62,7 +76,7 @@ export const ensureDataShape = (raw) => {
             goalInput: createGoalInput(lesson.goalInput),
             goalOutput: createGoalOutput(lesson.goalOutput),
             selectedInventoryIds: Array.isArray(lesson.selectedInventoryIds) ? lesson.selectedInventoryIds : [],
-            layoutPlacements: Array.isArray(lesson.layoutPlacements) ? lesson.layoutPlacements : []
+            layoutPlacements: normalizePlacements(lesson)
           })
         )
       : [],
@@ -72,7 +86,7 @@ export const ensureDataShape = (raw) => {
 
 export const createSampleData = () => {
   return {
-    version: 2,
+    version: 3,
     lessons: [
       createLesson({
         title: 'Setshot basketbal',
@@ -100,10 +114,10 @@ export const createSampleData = () => {
           {
             id: `placement_${generateId()}`,
             inventoryItemId: 'basketbal',
-            x: 18,
-            y: 36,
-            width: 5,
-            height: 5,
+            xM: 8.4,
+            yM: 5.3,
+            widthM: 0.9,
+            heightM: 0.9,
             rotation: 0,
             quantity: 6,
             renderMode: 'icon',
@@ -112,10 +126,10 @@ export const createSampleData = () => {
           {
             id: `placement_${generateId()}`,
             inventoryItemId: 'pilon',
-            x: 34,
-            y: 24,
-            width: 5,
-            height: 5,
+            xM: 13.2,
+            yM: 3.8,
+            widthM: 0.9,
+            heightM: 0.9,
             rotation: 0,
             quantity: 8,
             renderMode: 'icon',
